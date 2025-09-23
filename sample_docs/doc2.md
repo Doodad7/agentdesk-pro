@@ -1,0 +1,1 @@
+Machine learning is a subset of AI focused on training algorithms on data.

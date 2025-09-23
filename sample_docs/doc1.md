@@ -1,0 +1,1 @@
+Artificial Intelligence (AI) is the simulation of human intelligence by machines.
