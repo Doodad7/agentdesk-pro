@@ -1,1 +1,1 @@
-Machine learning is a subset of AI focused on training algorithms on data.
+Machine Learning (ML) is a subset of AI focused on training algorithms to learn patterns from data and make predictions or decisions without being explicitly programmed.
