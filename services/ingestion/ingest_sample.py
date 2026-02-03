@@ -8,13 +8,13 @@ import glob
 import psycopg2
 
 # Config
-QDRANT_URL = "http://localhost:6333"
+QDRANT_URL = os.getenv("QDRANT_URL", "http://qdrant:6333")
 COLLECTION_NAME = "agentdesk_docs"
 MODEL_NAME = "all-MiniLM-L6-v2"  # small & fast
 
 # init
 model = SentenceTransformer(MODEL_NAME)
-qdrant = QdrantClient(url=QDRANT_URL)
+qdrant = QdrantClient(url=QDRANT_URL, check_compatibility=False)
 
 # ensure collection exists
 qdrant.recreate_collection(

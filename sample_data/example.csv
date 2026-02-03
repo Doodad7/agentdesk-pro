@@ -1,0 +1,109 @@
+ID,Age,Gender,Height,Weight,BMI,Label
+1,25.00,Male,175.00,80.00,25.30,Normal Weight
+2,30.00,Female,160.00,60.00,22.50,Normal Weight
+3,35.00,Male,180.00,90.00,27.30,Overweight
+4,40.00,Female,150.00,50.00,20.00,Underweight
+5,45.00,Male,190.00,100.00,31.20,Obese
+6,50.00,Female,140.00,40.00,16.70,Underweight
+7,55.00,Male,200.00,110.00,34.20,Obese
+8,60.00,Female,130.00,30.00,13.30,Underweight
+9,65.00,Male,210.00,120.00,37.20,Obese
+10,70.00,Female,120.00,20.00,10.00,Underweight
+11,18.00,Male,175.00,70.00,23.40,Normal Weight
+12,23.00,Female,160.00,50.00,20.00,Underweight
+13,28.00,Male,180.00,80.00,25.30,Normal Weight
+14,33.00,Female,150.00,60.00,22.50,Normal Weight
+15,38.00,Male,190.00,90.00,27.30,Overweight
+16,43.00,Female,140.00,50.00,20.00,Underweight
+17,48.00,Male,200.00,100.00,31.20,Obese
+19,53.00,Female,130.00,40.00,16.70,Underweight
+20,58.00,Male,210.00,110.00,34.20,Obese
+21,63.00,Female,120.00,30.00,13.30,Underweight
+22,68.00,Male,175.00,80.00,25.30,Normal Weight
+23,73.00,Female,160.00,60.00,22.50,Normal Weight
+24,78.00,Male,180.00,90.00,27.30,Overweight
+25,83.00,Female,150.00,50.00,20.00,Underweight
+26,88.00,Male,190.00,100.00,31.20,Obese
+27,93.00,Female,140.00,40.00,16.70,Underweight
+28,98.00,Male,200.00,110.00,34.20,Obese
+29,103.00,Female,130.00,30.00,13.30,Underweight
+30,108.00,Male,210.00,120.00,37.20,Obese
+31,19.00,Male,175.00,75.00,24.20,Normal Weight
+32,24.00,Female,160.00,55.00,21.20,Normal Weight
+33,29.00,Male,180.00,85.00,26.10,Overweight
+35,39.00,Male,190.00,95.00,27.00,Overweight
+36,44.00,Female,140.00,75.00,25.00,Overweight
+37,49.00,Male,200.00,105.00,28.90,Obese
+38,54.00,Female,130.00,85.00,27.50,Overweight
+39,59.00,Male,210.00,115.00,30.80,Obese
+40,64.00,Female,120.00,95.00,29.10,Overweight
+41,17.00,Male,175.00,65.00,22.70,Normal Weight
+42,22.00,Female,160.00,45.00,18.70,Underweight
+43,27.00,Male,180.00,75.00,24.20,Normal Weight
+44,32.00,Female,150.00,55.00,21.20,Normal Weight
+45,37.00,Male,190.00,85.00,26.10,Overweight
+46,42.00,Female,140.00,65.00,22.70,Normal Weight
+47,47.00,Male,200.00,95.00,27.00,Overweight
+48,52.00,Female,130.00,75.00,25.00,Overweight
+49,57.00,Male,210.00,105.00,28.90,Obese
+50,62.00,Female,120.00,85.00,27.50,Overweight
+51,67.00,Male,175.00,65.00,22.70,Normal Weight
+52,72.00,Female,160.00,45.00,18.70,Underweight
+53,77.00,Male,180.00,75.00,24.20,Normal Weight
+54,82.00,Female,150.00,55.00,21.20,Normal Weight
+55,87.00,Male,190.00,85.00,26.10,Overweight
+56,92.00,Female,140.00,65.00,22.70,Normal Weight
+57,97.00,Male,200.00,95.00,27.00,Overweight
+58,102.00,Female,130.00,75.00,25.00,Overweight
+59,107.00,Male,210.00,105.00,28.90,Obese
+60,112.00,Female,120.00,85.00,27.50,Overweight
+61,16.00,Male,175.00,55.00,21.20,Normal Weight
+62,21.00,Female,160.00,35.00,16.70,Underweight
+63,26.00,Male,180.00,65.00,22.70,Normal Weight
+64,31.00,Female,150.00,45.00,18.70,Underweight
+65,36.00,Male,190.00,75.00,24.20,Normal Weight
+66,41.00,Female,140.00,55.00,21.20,Normal Weight
+67,46.00,Male,200.00,85.00,26.10,Overweight
+68,51.00,Female,130.00,65.00,22.70,Normal Weight
+69,56.00,Male,210.00,95.00,27.00,Overweight
+70,61.00,Female,120.00,75.00,25.00,Overweight
+71,15.00,Male,175.00,45.00,18.70,Underweight
+72,20.00,Female,160.00,30.00,13.30,Underweight
+73,25.00,Male,180.00,55.00,21.20,Normal Weight
+74,30.00,Female,150.00,40.00,16.70,Underweight
+75,35.00,Male,190.00,65.00,22.70,Normal Weight
+76,40.00,Female,140.00,50.00,20.00,Underweight
+77,45.00,Male,200.00,75.00,24.20,Normal Weight
+78,50.00,Female,130.00,60.00,22.50,Normal Weight
+79,55.00,Male,210.00,85.00,26.10,Overweight
+80,60.00,Female,120.00,70.00,23.40,Normal Weight
+81,14.00,Male,175.00,35.00,16.70,Underweight
+82,19.00,Female,160.00,25.00,10.00,Underweight
+83,24.00,Male,180.00,45.00,18.70,Underweight
+84,29.00,Female,150.00,30.00,13.30,Underweight
+85,34.00,Male,190.00,55.00,21.20,Normal Weight
+86,13.00,Male,175.00,25.00,10.00,Underweight
+87,18.00,Female,160.00,20.00,8.30,Underweight
+88,23.00,Male,180.00,30.00,13.30,Underweight
+89,28.00,Female,150.00,25.00,10.00,Underweight
+90,33.00,Male,190.00,40.00,16.70,Underweight
+91,38.00,Female,140.00,35.00,16.70,Underweight
+92,43.00,Male,200.00,50.00,20.00,Underweight
+93,48.00,Female,130.00,40.00,16.70,Underweight
+94,53.00,Male,210.00,55.00,21.20,Normal Weight
+95,58.00,Female,120.00,35.00,16.70,Underweight
+96,12.00,Male,175.00,15.00,5.60,Underweight
+97,17.00,Female,160.00,15.00,5.60,Underweight
+98,22.00,Male,180.00,20.00,8.30,Underweight
+99,27.00,Female,150.00,20.00,8.30,Underweight
+100,32.00,Male,190.00,25.00,10.00,Underweight
+101,37.00,Female,140.00,25.00,10.00,Underweight
+102,42.00,Male,200.00,30.00,13.30,Underweight
+103,47.00,Female,130.00,30.00,13.30,Underweight
+104,52.00,Male,210.00,35.00,16.70,Underweight
+105,57.00,Female,120.00,25.00,10.00,Underweight
+106,11.00,Male,175.00,10.00,3.90,Underweight
+107,16.00,Female,160.00,10.00,3.90,Underweight
+108,21.00,Male,180.00,15.00,5.60,Underweight
+109,26.00,Female,150.00,15.00,5.60,Underweight
+110,31.00,Male,190.00,20.00,8.30,Underweight

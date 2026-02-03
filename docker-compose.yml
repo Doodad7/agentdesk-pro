@@ -1,23 +1,64 @@
-version: '3.8'
+version: "3.8"
+
 services:
   postgres:
     image: postgres:15
     environment:
-      POSTGRES_PASSWORD: example
       POSTGRES_DB: agentdesk
       POSTGRES_USER: agentdesk
-    ports: ["5432:5432"]
+      POSTGRES_PASSWORD: supersecret
+    ports:
+      - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
 
   qdrant:
-    image: qdrant/qdrant:latest
+    image: qdrant/qdrant:v1.15.3
     ports:
       - "6333:6333"
+    volumes:
+      - qdrant_data:/qdrant/storage
 
   redis:
     image: redis:7
-    ports: ["6379:6379"]
+    ports:
+      - "6379:6379"
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./alerts.yml:/etc/prometheus/alerts.yml:ro
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+
+  web:
+    build: .
+    container_name: agentdesk_web
+    depends_on:
+      - postgres
+      - qdrant
+      - redis
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_USER: agentdesk
+      POSTGRES_PASSWORD: supersecret
+      POSTGRES_DB: agentdesk
+      QDRANT_URL: http://qdrant:6333
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    command: uvicorn services.api.main:app --host 0.0.0.0 --port 8000
+
 
 volumes:
   pgdata:
+  qdrant_data:

@@ -1,0 +1,22 @@
+groups:
+- name: agentdesk-alerts
+  rules:
+  # ---- Test alert (dev only) ----
+  - alert: TestTokensHigh
+    expr: rate(agentdesk_tokens_per_request_sum[1m]) > 0
+    for: 0s
+    labels:
+      severity: page
+    annotations:
+      summary: "Test alert: tokens per request > 0"
+      description: "Fires when any tokens-per-request activity is seen (dev test)."
+
+  # ---- Real alert (keeps your original rule) ----
+  - alert: HighLatency
+    expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le)) > 3
+    for: 5m
+    labels:
+      severity: page
+    annotations:
+      summary: "High p95 latency for AgentDesk"
+      description: "p95 latency greater than 3s for more than 5m"

@@ -1,69 +1,127 @@
 # services/ingestion/ingest_token_chunks.py
 """
-Token-based ingestion:
-- Reads sample_docs/*.md
-- Splits by tokens (tiktoken if available, otherwise whitespace)
-- Stores doc record in Postgres
-- Stores chunk metadata in Postgres
-- Upserts embeddings + payload to Qdrant
+Improved token-based ingestion with:
+- PII redaction
+- Chunk source labeling
+- Better metadata for RAG accuracy
+- Environment-driven Postgres + Qdrant config
 """
 
 import os
 import glob
-import time
-import uuid  # ✅ added for unique point IDs
+import uuid
+import re
+from dotenv import load_dotenv
+
+# ------------------------
+# Load environment
+# ------------------------
+try:
+    load_dotenv()
+except Exception:
+    pass
+
 import psycopg2
 from sentence_transformers import SentenceTransformer
 from qdrant_client import QdrantClient
 from qdrant_client.http.models import VectorParams, Distance
 
-# Try to use tiktoken for accurate tokenization; fallback to whitespace
+# ------------------------
+# Try tiktoken
+# ------------------------
 try:
     import tiktoken
     TOKTI = True
-    enc = tiktoken.get_encoding("cl100k_base")  # works for many modern tokenizers
+    enc = tiktoken.get_encoding("cl100k_base")
 except Exception:
     TOKTI = False
     enc = None
 
+# ------------------------
 # Config
-QDRANT_URL = "http://localhost:6333"
-COLLECTION_NAME = "agentdesk_docs"
-EMBED_MODEL = "all-MiniLM-L6-v2"  # fast & small for embeddings
-CHUNK_TOKENS = 500
-CHUNK_OVERLAP = 50
+# ------------------------
+QDRANT_URL = os.getenv("QDRANT_URL", "http://qdrant:6333")
+COLLECTION_NAME = os.getenv("QDRANT_COLLECTION", "agentdesk_docs")
+EMBED_MODEL = os.getenv("EMBED_MODEL", "all-MiniLM-L6-v2")
+CHUNK_TOKENS = int(os.getenv("CHUNK_TOKENS", "500"))
+CHUNK_OVERLAP = int(os.getenv("CHUNK_OVERLAP", "50"))
 
-# Init models & clients
+PG = dict(
+    dbname=os.getenv("POSTGRES_DB", "agentdesk"),
+    user=os.getenv("POSTGRES_USER", "agentdesk"),
+    password=os.getenv("POSTGRES_PASSWORD", "example"),
+    host=os.getenv("POSTGRES_HOST", "localhost"),
+    port=int(os.getenv("POSTGRES_PORT", "5432")),
+)
+
+# ------------------------
+# PII Redaction
+# ------------------------
+EMAIL_RE = re.compile(r'\b[\w\.-]+@[\w\.-]+\.\w+\b')
+PHONE_RE = re.compile(r'\b\d{3}[-.\s]??\d{3}[-.\s]??\d{4}\b')
+
+def redact_pii(text: str) -> str:
+    text = EMAIL_RE.sub("[EMAIL]", text)
+    text = PHONE_RE.sub("[PHONE]", text)
+    return text
+
+# ------------------------
+# Token Helpers
+# ------------------------
+def tokenize_text(text):
+    if TOKTI and enc:
+        return enc.encode(text)
+    return text.split()
+
+def decode_tokens(tokens):
+    if TOKTI and enc:
+        return enc.decode(tokens)
+    return " ".join(tokens)
+
+# ------------------------
+# Init models
+# ------------------------
 print("Loading embedding model...")
 embed_model = SentenceTransformer(EMBED_MODEL)
-qdrant = QdrantClient(url=QDRANT_URL)
 
-# Create / reset Qdrant collection if not exists
-print("Ensuring Qdrant collection exists...")
+print("Connecting to Qdrant...")
+qdrant = QdrantClient(url=QDRANT_URL, check_compatibility=False)
+
+# ------------------------
+# Ensure collection exists
+# ------------------------
 try:
-    qdrant.recreate_collection(
-        collection_name=COLLECTION_NAME,
-        vectors_config=VectorParams(size=embed_model.get_sentence_embedding_dimension(), distance=Distance.COSINE)
-    )
+    existing = [c.name for c in qdrant.get_collections().collections]
+    if COLLECTION_NAME not in existing:
+        qdrant.create_collection(
+            collection_name=COLLECTION_NAME,
+            vectors_config=VectorParams(
+                size=embed_model.get_sentence_embedding_dimension(),
+                distance=Distance.COSINE
+            )
+        )
+        print(f"Created collection {COLLECTION_NAME}")
+    else:
+        print(f"Collection {COLLECTION_NAME} exists.")
 except Exception as e:
-    print("Warning creating collection:", e)
+    print("Collection check error:", e)
 
-# Postgres connection (match docker-compose env)
+# ------------------------
+# Postgres
+# ------------------------
 print("Connecting to Postgres...")
-PG = dict(dbname="agentdesk", user="agentdesk", password="example", host="localhost", port=5432)
 conn = psycopg2.connect(**PG)
 cur = conn.cursor()
 
-# Create tables if needed
 cur.execute("""
 CREATE TABLE IF NOT EXISTS documents (
     id SERIAL PRIMARY KEY,
-    doc_id TEXT,
     source TEXT,
     full_text TEXT,
     inserted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )
 """)
+
 cur.execute("""
 CREATE TABLE IF NOT EXISTS chunks (
     id SERIAL PRIMARY KEY,
@@ -76,103 +134,86 @@ CREATE TABLE IF NOT EXISTS chunks (
     inserted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )
 """)
+
 conn.commit()
 
-# Helper tokenization functions
-def tokenize_text(text):
-    if TOKTI and enc:
-        token_ids = enc.encode(text)
-        return token_ids
-    else:
-        # simple whitespace fallback (approx tokens)
-        return text.split()
-
-def decode_tokens(token_sequence):
-    if TOKTI and enc:
-        return enc.decode(token_sequence)
-    else:
-        # fallback: list of words -> join
-        if isinstance(token_sequence, list):
-            return " ".join(token_sequence)
-        return str(token_sequence)
-
-# Ingest documents
+# ------------------------
+# Ingest Files
+# ------------------------
 files = sorted(glob.glob("sample_docs/*.md"))
-print(f"Found {len(files)} files to ingest.")
+print(f"Found {len(files)} markdown files.")
 
 for fpath in files:
-    with open(fpath, "r", encoding="utf-8") as fh:
-        full_text = fh.read().strip()
-    doc_basename = os.path.basename(fpath)
-    doc_id = doc_basename  # simple doc id
+    with open(fpath, "r", encoding="utf-8") as f:
+        raw_text = f.read().strip()
 
-    # Insert document record
-    cur.execute(
-        "INSERT INTO documents (source, text) VALUES (%s, %s) RETURNING id",
-        (doc_basename, full_text),
-    )
-    doc_db_id = cur.fetchone()[0]
-    conn.commit()
-    print(f"Inserted document {doc_basename} with db id {doc_db_id}")
+    redacted_text = redact_pii(raw_text)
+    filename = os.path.basename(fpath)
 
-    # Tokenize and create chunks
-    tokens = tokenize_text(full_text)
-    total_length = len(tokens)
-    print(f"Token length: {total_length}")
+    # Store document
+    cur.execute("SELECT id FROM documents WHERE source=%s", (filename,))
+    row = cur.fetchone()
 
-    points = []
-    chunk_idx = 0
-    search_pos = 0  # char search start to get char ranges
+    if row:
+        doc_db_id = row[0]
+    else:
+        cur.execute(
+            "INSERT INTO documents (source, full_text) VALUES (%s,%s) RETURNING id",
+            (filename, redacted_text)
+        )
+        doc_db_id = cur.fetchone()[0]
+        conn.commit()
+
+    print(f"Ingesting {filename}")
+
+    tokens = tokenize_text(redacted_text)
+    total_tokens = len(tokens)
+
     step = CHUNK_TOKENS - CHUNK_OVERLAP
-    for start_tok in range(0, total_length, step):
-        chunk_tokens = tokens[start_tok:start_tok + CHUNK_TOKENS]
-        if not chunk_tokens:
-            break
-        chunk_text = decode_tokens(chunk_tokens) if TOKTI else " ".join(chunk_tokens)
-        # find char range (best-effort)
-        found_at = full_text.find(chunk_text, search_pos)
-        if found_at == -1:
-            found_at = search_pos
-        char_start = found_at
-        char_end = found_at + len(chunk_text)
-        search_pos = char_end
+    points = []
+    chunk_id = 0
 
-        # embedding
-        emb = embed_model.encode(chunk_text).tolist()
+    for start in range(0, total_tokens, step):
+        chunk_tokens = tokens[start:start + CHUNK_TOKENS]
+        chunk_body = decode_tokens(chunk_tokens)
+
+        # ⭐ Add document context
+        chunk_text = f"Source: {filename}\n\n{chunk_body}"
+
+        embedding = embed_model.encode(chunk_text).tolist()
 
         payload = {
-            "doc_id": doc_id,
-            "chunk_id": chunk_idx,
-            "text": chunk_text,
-            "char_start": int(char_start),
-            "char_end": int(char_end),
-            "token_count": len(chunk_tokens)
+            "doc_id": filename,
+            "chunk_id": chunk_id,
+            "source": filename,
+            "text": chunk_body
         }
 
-        # ✅ FIXED: use UUID instead of string id
-        point = {"id": str(uuid.uuid4()), "vector": emb, "payload": payload}
-        points.append(point)
+        points.append({
+            "id": str(uuid.uuid4()),
+            "vector": embedding,
+            "payload": payload
+        })
 
-        # insert chunk metadata to Postgres
         cur.execute(
             "INSERT INTO chunks (doc_id, chunk_id, text, token_count, char_start, char_end) VALUES (%s,%s,%s,%s,%s,%s)",
-            (doc_id, chunk_idx, chunk_text, len(chunk_tokens), int(char_start), int(char_end))
+            (filename, chunk_id, chunk_body, len(chunk_tokens), 0, 0)
         )
-        chunk_idx += 1
 
-        # For memory safety, flush every 100 points
+        chunk_id += 1
+
         if len(points) >= 100:
             qdrant.upsert(collection_name=COLLECTION_NAME, points=points)
             points = []
             conn.commit()
-            print(f"Upserted 100 points for {doc_id}...")
 
-    # flush remaining points
     if points:
         qdrant.upsert(collection_name=COLLECTION_NAME, points=points)
         conn.commit()
-        print(f"Upserted remaining points for {doc_id} (chunks: {chunk_idx})")
 
-print("Ingestion complete.")
+    print(f"Finished {filename} ({chunk_id} chunks)")
+
+print("✅ Ingestion complete.")
+
 cur.close()
 conn.close()
