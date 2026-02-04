@@ -4,7 +4,7 @@ resource "random_id" "suffix" {
 }
 
 ########################################
-# ECR repository (if you already created ECR manually, this is fine too)
+# ECR repository
 ########################################
 resource "aws_ecr_repository" "agentdesk" {
   name = "agentdesk"
@@ -126,8 +126,8 @@ resource "aws_security_group" "ecs_task_sg" {
     from_port       = var.container_port
     to_port         = var.container_port
     protocol        = "tcp"
-    # security_groups = [aws_security_group.alb_sg.id]   # I commented this
-    cidr_blocks = ["0.0.0.0/0"]   # allow public access (I added this)
+    # security_groups = [aws_security_group.alb_sg.id]
+    cidr_blocks = ["0.0.0.0/0"]   # allow public access
   }
 
   ########################################################################################
@@ -153,7 +153,7 @@ resource "aws_security_group" "ecs_task_sg" {
 resource "aws_db_instance" "postgres" {
   identifier          = "agentdesk-postgres-${random_id.suffix.hex}"
   engine              = "postgres"
-  instance_class      = "db.t3.micro"   # small; still billed
+  instance_class      = "db.t3.micro"   
   allocated_storage   = var.db_allocated_storage
   db_name             = "agentdesk"
   username            = var.db_username
@@ -224,7 +224,7 @@ resource "aws_cloudwatch_log_group" "ecs_agentdesk" {
 resource "aws_ecs_cluster" "agentdesk" {
   name = "agentdesk-cluster"
 }
-########################################################################################################################################################################
+
 ##########################
 # Application Load Balancer (ALB)
 ##########################
@@ -281,8 +281,8 @@ resource "aws_lb_listener" "listener" {
 ########################################
 resource "aws_ecs_task_definition" "task" {
   family                   = "agentdesk-task"
-  cpu                      = "1024"      # ✅ increased
-  memory                   = "2048"      # ✅ increased
+  cpu                      = "1024"      
+  memory                   = "2048"      
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
@@ -290,7 +290,7 @@ resource "aws_ecs_task_definition" "task" {
 
   container_definitions = jsonencode([
     ###############################
-    # ✅ 1) Main FastAPI container
+    # 1) Main FastAPI container
     ###############################
     {
       name  = "agentdesk"
@@ -310,10 +310,10 @@ resource "aws_ecs_task_definition" "task" {
       environment = [
         { name = "POSTGRES_DB",     value = "agentdesk" },
         { name = "POSTGRES_USER",   value = "agentdesk" },
-        { name = "POSTGRES_PASSWORD", value = "supersecret" },
+        { name = "POSTGRES_PASSWORD", value = var.db_password },
         { name = "POSTGRES_HOST",  value = aws_db_instance.postgres.address },
 
-        # ✅ Local Qdrant + Redis
+        # Local Qdrant + Redis
         { name = "QDRANT_URL", value = "http://qdrant.agentdesk.local:6333" },
         { name = "REDIS_HOST", value = "127.0.0.1" },
         { name = "REDIS_PORT", value = "6379" }
@@ -330,7 +330,7 @@ resource "aws_ecs_task_definition" "task" {
     },
 
     ###############################
-    # ✅ 3) Redis sidecar
+    # 3) Redis sidecar
     ###############################
     {
       name       = "redis"

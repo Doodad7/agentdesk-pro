@@ -23,7 +23,7 @@ resource "aws_ecs_task_definition" "ingestion" {
       environment = [
         { name = "POSTGRES_DB", value = "agentdesk" },
         { name = "POSTGRES_USER", value = "agentdesk" },
-        { name = "POSTGRES_PASSWORD", value = "supersecret" },
+        { name = "POSTGRES_PASSWORD", value = var.db_password },
         { name = "POSTGRES_HOST", value = aws_db_instance.postgres.address },
 
         { name = "QDRANT_URL", value = "http://qdrant.agentdesk.local:6333" }
