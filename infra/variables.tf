@@ -14,10 +14,9 @@ variable "db_username" {
 }
 
 variable "db_password" {
-  type    = string
-  description = "DB password - keep private"
-  default = "supersecret"
-  sensitive = true
+  type        = string
+  description = "Postgres password"
+  sensitive   = true
 }
 
 variable "db_allocated_storage" {
