@@ -4,12 +4,11 @@ import torch
 from typing import List
 from PIL import Image
 
-# import clip lazily to avoid heavy import at module load time
-# (some CLIP installs expose module name 'clip')
+
 try:
-    import clip  # type: ignore
+    import clip 
 except Exception:
-    clip = None  # we'll raise if used and not available
+    clip = None
 
 _device = "cuda" if torch.cuda.is_available() else "cpu"
 

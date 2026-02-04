@@ -1,5 +1,4 @@
 # services/api/main.py
-# Full FastAPI app for AgentDesk Pro with Prometheus + optional OpenTelemetry instrumentation
 
 from fastapi import FastAPI
 from pydantic import BaseModel
@@ -25,7 +24,7 @@ from services.vision.clip_embed import embed_image, embed_texts
 
 import tempfile
 import uuid
-from qdrant_client.http import models  # ✅ Add this import at the top of the file if missing
+from qdrant_client.http import models
 
 # load .env for local dev
 try:
@@ -196,7 +195,6 @@ def retrieve(inp: QueryIn):
 
     return {"query": query, "hits": hits}
 
-########################################################################################################
 @app.post("/query")
 def query_endpoint(inp: QueryIn):
 
@@ -254,8 +252,6 @@ async def ingest_image(file: UploadFile = File(...)):
         with open(tmp.name, "wb") as f:
             shutil.copyfileobj(file.file, f)
         text = extract_text_from_image(tmp.name)
-        # Now reuse your ingestion logic: split into chunks and upsert to Qdrant + insert metadata to Postgres
-        # A simple approach: call existing ingestion utilities (or inline minimal upsert)
         return {"ok": True, "extracted_chars": len(text), "preview": text[:300]}
     finally:
         try: os.unlink(tmp.name)
@@ -286,7 +282,7 @@ async def embed_image_endpoint(file: UploadFile = File(...), tenant: str = "defa
     except Exception:
         pass
 
-    # ✅ Upsert single image embedding
+    # Upsert single image embedding
     point = models.PointStruct(
         id=str(uuid.uuid4()),  # valid UUID for Qdrant
         vector=vec,            # correct variable name
