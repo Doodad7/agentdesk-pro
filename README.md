@@ -65,34 +65,37 @@ Final Answer
 ---
 
 ## 📁 Project Structure
-
+```
 agentdesk-pro/
 │
 ├── services/
-│ ├── api/ # FastAPI app
-│ ├── agents/ # Orchestrator, planner, knowledge agents
-│ ├── ingestion/ # Data ingestion scripts
-│ ├── tools/ # Agent tools
-│ └── vision/ # Optional OCR / vision modules
+│   ├── api/            # FastAPI app
+│   ├── agents/         # Orchestrator, planner, knowledge agents
+│   ├── ingestion/      # Data ingestion scripts
+│   ├── tools/          # Agent tools
+│   └── vision/         # Optional OCR / vision modules
 │
-├── infra/ # Terraform infrastructure
-├── sample_docs/ # Example documents
-├── scripts/ # Utility scripts
+├── infra/              # Terraform infrastructure
+├── sample_docs/        # Example documents
+├── scripts/            # Utility scripts
 ├── docker-compose.yml
 ├── Dockerfile
 ├── requirements.txt
 ├── .env.example
 └── README.md
+```
 
 ---
 
 ## ⚙️ Environment Setup
 
 Create a `.env` file using the template:
+```
 cp .env.example .env
+```
 
 Edit values inside `.env`:
-
+```
 POSTGRES_USER=agentdesk
 POSTGRES_PASSWORD=your_password
 POSTGRES_DB=agentdesk
@@ -101,34 +104,34 @@ POSTGRES_PORT=5432
 
 HUGGINGFACE_API_KEY=your_key
 HUGGINGFACE_MODEL=your_model
-
+```
 ---
 
 ## ▶️ Run Locally (Docker)
-
+```
 docker-compose up --build
-
+```
 API will be available at:
-
+```
 http://localhost:8000
-
+```
 Example endpoint:
 
 POST /retrieve
-
+```
 Body:
 {
 "q": "What is the refund policy?"
 }
-
+```
 ---
 
 ## ☁️ Cloud Deployment (AWS + Terraform)
-
+```
 cd infra
 terraform init
 terraform apply
-
+```
 Terraform provisions:
 
 - VPC & Subnets
