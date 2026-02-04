@@ -1,8 +1,0 @@
-{
-  "vectors": {
-    "default": {
-      "size": 384,
-      "distance": "Cosine"
-    }
-  }
-}
