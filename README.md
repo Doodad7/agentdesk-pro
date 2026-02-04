@@ -189,8 +189,7 @@ It mirrors how modern AI products are built in industry.
 
 ## 📌 Author
 
-**Bassam Mohammed**  
-Data Science & AI Student  
+**Bassam Mohammed** 
 
 GitHub: https://github.com/Doodad7  
 LinkedIn: https://www.linkedin.com/in/bassam-mohammed-ba3284315/
