@@ -69,15 +69,15 @@ Final Answer
 agentdesk-pro/
 │
 ├── services/
-│ ├── api/           # FastAPI app
-│ ├── agents/        # Orchestrator, planner, knowledge agents
-│ ├── ingestion/     # Data ingestion scripts
-│ ├── tools/         # Agent tools
-│ └── vision/        # Optional OCR / vision modules
+│ ├── api/ # FastAPI app
+│ ├── agents/ # Orchestrator, planner, knowledge agents
+│ ├── ingestion/ # Data ingestion scripts
+│ ├── tools/ # Agent tools
+│ └── vision/ # Optional OCR / vision modules
 │
-├── infra/           # Terraform infrastructure
-├── sample_docs/     # Example documents
-├── scripts/         # Utility scripts
+├── infra/ # Terraform infrastructure
+├── sample_docs/ # Example documents
+├── scripts/ # Utility scripts
 ├── docker-compose.yml
 ├── Dockerfile
 ├── requirements.txt
