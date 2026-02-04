@@ -26,6 +26,8 @@ The system is containerized, observable, and deployable locally via Docker or in
 
 ## 🧠 System Architecture
 
+![System Architecture](docs/architecture.png)
+
 **High-level flow:**
 
 User ↓  
