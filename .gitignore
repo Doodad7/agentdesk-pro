@@ -17,3 +17,14 @@ __pycache__/
 *.tfstate
 *.tfstate.backup
 infra/terraform.tfvars
+
+# Experimental / local only
+finetune.py
+inference.py
+train.py
+locustfile.py
+example.txt
+data.jsonl
+taskdef.json
+collection.json
+query.json
